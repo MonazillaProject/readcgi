@@ -21,5 +21,10 @@ module.exports = {
                 presets: ['es2015']
             }
         }]
+    },
+    vue: {
+        autoprefixer: {
+            browsers: ['last 2 versions']
+        }
     }
 };
