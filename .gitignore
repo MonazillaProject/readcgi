@@ -1,3 +1,6 @@
 node_modules/*
 typings/*
 .htaccess
+jsconfig.json
+.babelrc
+build/*
