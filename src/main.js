@@ -31,7 +31,7 @@ Vue.use(VueMdl);
 
 const router = new VueRouter({ history: false, saveScrollPosition: true });
 router.redirect({
-    '/': '/history'
+    '/': '/history/recent'
 });
 
 
