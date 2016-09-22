@@ -15,3 +15,25 @@
  *  You should have received a copy of the GNU General Public License
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
+
+const Vue = require('vue');
+const VueRouter = require('vue-router');
+const VueMdl = require('vue-mdl').default;
+
+const Thread = require('./thread.js');
+
+require('material-design-lite/material.js');
+require('material-design-lite/material.css');
+require('moment/locale/ja');
+
+Vue.use(VueRouter);
+Vue.use(VueMdl);
+
+const router = new VueRouter({ history: false, saveScrollPosition: true });
+router.redirect({
+    '/': '/history'
+});
+
+
+const app = Vue.extend(require('../app.vue'));
+router.start(app, '#app');
