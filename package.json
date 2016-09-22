@@ -14,7 +14,7 @@
         "2ch"
     ],
     "author": "2chOpenSource",
-    "license": "MIT",
+    "license": "GNU General Public License",
     "bugs": {
         "url": "https://github.com/2chOpenSource/readcgi/issues"
     },
