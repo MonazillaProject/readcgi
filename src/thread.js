@@ -19,13 +19,12 @@
 require('whatwg-fetch');
 const moment = require('moment');
 const config = require('./config.js');
-const DOWNLOAD_FULL = 0;
-const DOWNLOAD_PART = 1;
-const DOWNLOAD_NOTMODIFIED = 2;
 
 class Thread {
     constructor() {
-
+        this.DOWNLOAD_TYPE_FULL = 'full';
+        this.DOWNLOAD_TYPE_PART = 'part';
+        this.DOWNLOAD_TYPE_NOTMODIFIED = 'notmodified';
     }
 
     openIndexedDB() {
@@ -85,7 +84,7 @@ class Thread {
                 if (xhr.status == 200) {
                     //通常
                     resolve({
-                        type: DOWNLOAD_FULL,
+                        type: this.DOWNLOAD_TYPE_FULL,
                         content: xhr.response,
                         length: e.loaded,
                         modified: xhr.getResponseHeader("Last-Modified")
@@ -95,7 +94,7 @@ class Thread {
                         if (xhr.response.substr(0, 1) == "\n") {
                             //差分DL
                             resolve({
-                                type: DOWNLOAD_PART,
+                                type: this.DOWNLOAD_TYPE_PART,
                                 content: xhr.response.substr(1),
                                 length: options.currentFileSize + e.loaded,
                                 modified: xhr.getResponseHeader("Last-Modified")
@@ -115,7 +114,7 @@ class Thread {
                 } else if (xhr.status == 304) {
                     //更新なし
                     resolve({
-                        type: DOWNLOAD_NOTMODIFIED,
+                        type: this.DOWNLOAD_TYPE_NOTMODIFIED,
                         length: options.currentFileSize,
                         modified: options.lastModified
                     });
@@ -125,6 +124,7 @@ class Thread {
                         currentFileSize: -1
                     })).then(data => resolve(data));
                 } else {
+                    // その他エラー
                     reject(xhr);
                 }
             };
@@ -137,13 +137,14 @@ class Thread {
     getThread(server, bbs, key) {
         return this.openIndexedDB().then(db => {
             return this.findThreadInfo(db, bbs, key).then(info => {
-                console.log("thread cache available");
+                console.log("Cache hit!");
                 return this.downloadThread(server, bbs, key, {
                     lastModified: info.modified,
                     currentFileSize: info.contentLength
                 }).then(data => {
                     console.log(data);
-                    if (data.type == DOWNLOAD_NOTMODIFIED) {
+                    if (data.type == this.DOWNLOAD_TYPE_NOTMODIFIED) {
+                        console.info("Not modified");
                         return {
                             server: server,
                             bbs: bbs,
@@ -153,18 +154,22 @@ class Thread {
                             modified: data.modified
                         };
                     }
-                    if (data.type == DOWNLOAD_PART)
+                    if (data.type == this.DOWNLOAD_TYPE_PART) {
+                        console.info("Partial downloaded");
                         info.content = info.content + data.content;
+                    } else {
+                        console.warn("Re-downloaded");
+                    }
                     return this.updateThreadInfo(db, server, bbs, key, info.content, data.length, data.modified);
                 });
             }, error => {
-                console.info("thread information not found");
+                console.info("Cache not found");
                 return this.downloadThread(server, bbs, key, {}).then(data => {
                     return this.updateThreadInfo(db, server, bbs, key, data.content, data.length, data.modified);
                 });
             })
-        }).catch(error => {
-            console.error("indexedDB open error", error);
+        }, error => {
+            console.error("indexedDB init failed", error);
             return this.downloadThread(server, bbs, key, {}).then(data => {
                 return {
                     server: server,
@@ -175,6 +180,9 @@ class Thread {
                     modified: data.modified
                 };
             });
-        })
+        });
     }
 }
+
+const _Thread = new Thread();
+module.exports = _Thread;
