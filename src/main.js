@@ -20,7 +20,7 @@ const Vue = require('vue');
 const VueRouter = require('vue-router');
 const VueMdl = require('vue-mdl').default;
 
-const Thread = require('./thread.js');
+const ThreadLoader = require('./thread_loader.js');
 
 require('material-design-lite/material.js');
 require('material-design-lite/material.css');
@@ -28,8 +28,16 @@ require('moment/locale/ja');
 
 Vue.use(VueRouter);
 Vue.use(VueMdl);
+Vue.mixin({
+    created() {
+        this.$threadLoader = ThreadLoader;
+    }
+})
 
-const router = new VueRouter({ history: false, saveScrollPosition: true });
+const router = new VueRouter({
+    history: false,
+    saveScrollPosition: true
+});
 router.redirect({
     '/': '/history/recent'
 });
