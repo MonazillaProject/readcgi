@@ -5,33 +5,27 @@
             <span class="mdl-layout-title">{{ title || '2ch Viewer'}}</span>
             <div class="mdl-layout-spacer"></div>
             <nav class="mdl-navigation mdl-layout--large-screen-only">
-                <a class="mdl-navigation__link" v-for="key in toolbar" v-link="{ path: toolbar_all[key].path || '/blank' }" @click="toolbarClick($event, key)">{{ toolbar_all[key].name }}</a>
+                <a class="mdl-navigation__link" v-for="key in toolbar" v-link="{ path: toolbar_all[key].path || '#' }" @click.prevent="clickToolbar(key)">{{ toolbar_all[key].name }}</a>
             </nav>
         </div>
     </header>
     <div class="mdl-layout__drawer">
         <span class="mdl-layout-title">2ch Viewer</span>
         <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" v-for="key in toolbar" v-link="{ path: toolbar_all[key].path || '/blank' }" @click="toolbarClick($event, key)">{{ toolbar_all[key].name }}</a>
+            <a class="mdl-navigation__link" v-for="key in toolbar" href="#" @click.prevent="clickToolbar(key)">{{ toolbar_all[key].name }}</a>
         </nav>
         <hr />
         <nav class="mdl-navigation">
-            <a class="mdl-navigation__link" v-for="item in menu" v-link="{ path: item.path }">{{ item.name }}</a>
+            <a class="mdl-navigation__link" v-for="item in menu" href="#" @click.prevent="clickMenu(item.key)">{{ item.name }}</a>
         </nav>
     </div>
     <router-view></router-view>
     <div class="mdl-layout__floating">
         <span v-show="is_fab_open">
-            <mdl-button mini-fab colored v-mdl-ripple-effect v-for="key in toolbar" v-if="toolbar_all[key].button" v-link="{ path: toolbar_all[key].path || '/blank' }" @click="toolbarClick($event, key)" :id="'fab-' + key" >
+            <mdl-button mini-fab colored v-mdl-ripple-effect v-for="key in toolbar" v-if="toolbar_all[key].button" @click="clickFab(key)" :id="'fab-' + key" >
                 <i class="material-icons">{{ toolbar_all[key].button }}</i>
             </mdl-button>
-            <mdl-tooltip v-for="key in toolbar" v-if="toolbar_all[key].button" :for="'fab-' + key">{{ toolbar_all[key].name }}</mdl-tooltip>
-            <mdl-button id="menu_switch" mini-fab colored v-mdl-ripple-effect>
-                <i class="material-icons">more_vert</i>
-            </mdl-button>
-            <ul class="mdl-menu mdl-menu--top-right mdl-js-menu mdl-js-ripple-effect" data-mdl-for="menu_switch">
-                <li class="mdl-menu__item" v-for="item in menu" @click="$router.go({ path: item.path })">{{ item.name }}</li>
-            </ul>
+            <mdl-tooltip class="mdl-tooltip--left" v-for="key in toolbar" v-if="toolbar_all[key].button" :for="'fab-' + key">{{ toolbar_all[key].name }}</mdl-tooltip>
         </span>
         <mdl-button fab colored v-mdl-ripple-effect @click="is_fab_open=!is_fab_open">
             <i class="material-icons" :class="{ open: is_fab_open }">add</i>
@@ -45,13 +39,13 @@ export default {
         let _this = this;
         return {
             menu_items: [{
-                path: '/display-config',
+                key: 'display-config',
                 name: '表示設定'
             }, {
-                path: '/ng-config',
+                key: 'ng-config',
                 name: 'NG編集'
             }, {
-                path: '/setting',
+                key: 'setting',
                 name: '設定'
             }],
             toolbar_all: {
@@ -97,11 +91,26 @@ export default {
         }
     },
     methods: {
-        toolbarClick(e, key) {
-            if ('event' in this.toolbar_all[key]) {
-                e.preventDefault();
+        clickToolbar(key) {
+            if ('path' in this.toolbar_all[key])
+                this.$router.go({
+                    path: this.toolbar_all[key].path
+                });
+            else if ('event' in this.toolbar_all[key])
                 this.toolbar_all[key].event();
-            }
+        },
+        clickFab(key) {
+            this.clickToolbar(key);
+            this.is_fab_open = false;
+        },
+        clickFabMenu(path) {
+            this.$router.replace({
+                path: path
+            });
+            this.is_fab_open = false;
+        },
+        clickMenu(key) {
+
         }
     }
 }
