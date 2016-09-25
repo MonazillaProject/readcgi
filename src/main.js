@@ -16,32 +16,32 @@
  *  along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-const Vue = require('vue');
-const VueRouter = require('vue-router');
-const VueMdl = require('vue-mdl').default;
-
-const ThreadLoader = require('./thread_loader.js');
+const vue = require('vue');
+const vueRouter = require('vue-router');
+const vueMdl = require('vue-mdl').default;
 
 require('material-design-lite/material.js');
 require('material-design-lite/material.css');
 require('moment/locale/ja');
 
-Vue.use(VueRouter);
-Vue.use(VueMdl);
-Vue.mixin({
-    created() {
-        this.$threadLoader = ThreadLoader;
-    }
-})
+vue.use(vueRouter);
+vue.use(vueMdl);
 
-const router = new VueRouter({
+const router = new vueRouter({
     history: false,
     saveScrollPosition: true
 });
 router.redirect({
     '/': '/history/recent'
 });
+router.map({
+    '/read/:bbs/:key': {
+        component: require('../pages/read.vue')
+    },
+    '/read/:bbs/:key/:selector': {
+        component: require('../pages/read.vue')
+    }
+})
 
-
-const app = Vue.extend(require('../app.vue'));
+const app = vue.extend(require('../app.vue'));
 router.start(app, '#app');

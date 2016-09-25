@@ -68,6 +68,8 @@ module.exports = {
             xhr.overrideMimeType(config.THREAD_FILE_MIME);
             if (options.lastModified) {
                 xhr.setRequestHeader('If-Modified-Since', options.lastModified);
+            } else {
+                xhr.setRequestHeader('If-Modified-Since', 'Thu, 01 Jan 1970 00:00:00 GMT');
             }
             if (options.currentFileSize > 0) {
                 xhr.setRequestHeader('Range', `bytes=${options.currentFileSize - 1}-`);
@@ -155,18 +157,18 @@ module.exports = {
                         return {
                             bbs: bbs,
                             key: key,
-                            content: data.content,
+                            content: info.content,
                             contentLength: data.length,
                             modified: data.modified
                         };
                     }
                     if (data.type == this.DOWNLOAD_TYPE_PART) {
                         console.info("Partial downloaded");
-                        info.content = info.content + data.content;
+                        data.content = info.content + data.content;
                     } else {
                         console.warn("Re-downloaded");
                     }
-                    return this.updateThreadInfo(db, bbs, key, info.content, data.length, data.modified);
+                    return this.updateThreadInfo(db, bbs, key, data.content, data.length, data.modified);
                 });
             }, error => {
                 console.info("Cache not found");
