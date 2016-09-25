@@ -32,5 +32,19 @@ module.exports = {
         } else if (selector.match(/^l(\d+)$/i))
             selectorArray.fill(true, count - 1 - Math.min(parseInt(RegExp.$1, 10) - 1, count - 1), count);
         return selectorArray;
+    },
+    zen2Han(text) {
+        return text
+            .replace(/１/g, '1')
+            .replace(/２/g, '2')
+            .replace(/３/g, '3')
+            .replace(/４/g, '4')
+            .replace(/５/g, '5')
+            .replace(/６/g, '6')
+            .replace(/７/g, '7')
+            .replace(/８/g, '8')
+            .replace(/９/g, '9')
+            .replace(/０/g, '9')
+            .replace(/[＞〉》]/g, '>');
     }
 };
